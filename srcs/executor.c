@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:26:33 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/18 12:49:00 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/19 22:52:27 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ int	start_executor(t_jobs *job, char **env, char ***temp_vars)
 	int saved_stdout = dup(STDOUT_FILENO);
 	int redirected_input;
 	int redirected_output;
- 	if (set_signal(SIGINT, ctrl_c_idle) < 0 || set_signal(SIGQUIT, sigquit) < 0)
+ 	if (set_signal(SIGINT, ctrl_c) < 0 || set_signal(SIGQUIT, sigquit) < 0)
 	{
 		ft_printf("Error: signal\n");
 		clear_jobs(&job);

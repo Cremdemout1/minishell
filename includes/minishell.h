@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 16:38:21 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/19 22:11:02 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/19 22:50:59 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,7 @@ t_jobs	*build(char *command_line, char **env, int status);
 void	ctrl_c_idle(int sig);
 int		set_signal(int sig, void f(int));
 void	sigquit(int sig);
+void	ctrl_c(int sig);
 
 void	check_exit(char *line);
 

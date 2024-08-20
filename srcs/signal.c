@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/15 22:37:39 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/19 22:50:15 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,12 @@ void	sigquit(int sig)
 {
 	(void)sig;
 	ft_printf("Quit\n");
+}
+
+void	ctrl_c(int sig)
+{
+	(void)sig;
+	ft_printf("\n");
 }
 
 int	set_signal(int sig, void f(int))
