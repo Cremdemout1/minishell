@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/19 22:21:19 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/19 22:44:41 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,8 +180,6 @@ void make_job_list(t_jobs **job_list, t_token **tok_list, char **env)
             continue;
         }
         new->job = job_array(&cur, &new, env);
-        for (int i = 0; new->job[i]; i++)
-            printf("job[%d]: %s\n", i, new->job[i]);
         new->type = WORD;
         go_to_next_job(job_list, new);
     }
