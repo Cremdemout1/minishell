@@ -6,13 +6,13 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/19 08:50:12 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/19 22:23:51 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-void	tokenize(t_token **list, char *str)
+void	tokenize(t_token **list, char *str, char **env, int status)
 {
 	int		i;
 	char	**array;
@@ -20,6 +20,15 @@ void	tokenize(t_token **list, char *str)
 
 	i = 0;
 	array = token_array(str);
+	char *temp;
+	while (array[i])
+	{
+		temp = unquote_and_direct(array[i], env, NULL, 0);
+		free(array[i]);
+		array[i] = temp;
+		i++;
+	}
+	i = 0;
 	if (!array)
 		return;
 	while (array[i])

@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/19 09:13:08 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/19 22:21:19 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,12 @@ t_token	*developed_cmdline_tokenization(char *command_line, char **env, int stat
 
 	list = NULL;
 	simplified = split_complex_args(command_line);
-	//converted = unquote_and_direct(simplified, env, NULL, status);
+	converted = unquote_and_direct(simplified, env, NULL, status);
     //change the place when i will impliment expansion to job array so that a quoted string can be seen as an entire string in array
-	//free(simplified);
-	//tokenize(&list, converted);
-	//free(converted);
-    tokenize(&list, simplified);
-    free(simplified);
+	free(simplified);
+	tokenize(&list, converted, env, status);
+	free(converted);
+    //tokenize(&list, command_line, env, status);
 	if (parse(&list) == -1)
 	{
 		clear_list(&list);
@@ -60,19 +59,6 @@ t_jobs	*build(char *command_line, char **env, int status)
     free(command_line);
 	return (jobs);
 }
-
-// char	*unquoted(char *str, char **env)
-// {
-//     char *new;
-
-//     if (*str == '\'')
-//         new = ft_strtrim(str, "\'");
-//     else if(*str == '\"')
-//         new = ft_strtrim(expand_env_vars(str, env, NULL), "\"");
-//     else
-//         new = ft_strdup(expand_env_vars(str, env, NULL));
-//     return (new);
-// }
 
 char	*assign_cmd(t_token *cur)
 {

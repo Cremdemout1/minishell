@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno <bruno@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 16:38:21 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/16 01:17:49 by bruno            ###   ########.fr       */
+/*   Updated: 2024/08/19 22:11:02 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,13 +103,13 @@ char	*ft_getenv(char *str, char **env);
 char	*expand_env_vars(char *input, char **env, char **temp_vars);
 char	*no_expansion(char *str, t_var_holder h);
 char	*expansion(char *str, t_var_holder *h, char **env, char **temp_vars, int status);
-char *unquote_and_direct(char *str, char **env, char **temp_vars, int status);
+char 	*unquote_and_direct(char *str, char **env, char **temp_vars, int status);
 
 //executor
 int		start_executor(t_jobs *job, char **env, char ***temp_vars);
 int		child_process(t_jobs *job, char **env, char ***temp_vars);
 int		simple_process(t_jobs *job, char **env, char ***temp_vars);
-int	execute_job(char **command, char **env);
+int		execute_job(char **command, char **env);
 int		new_fork(void);
 void	panic(char *s);
 
@@ -141,7 +141,7 @@ char	*split_complex_args(char *str);
 int		assign_i(char *str, int i);
 int		count_words(char *str);
 char	**token_array(char *str);
-void	tokenize(t_token **list, char *str);
+void	tokenize(t_token **list, char *str, char **env, int status);
 int		define_type(char *str);
 t_token	*addtok(void *content);
 t_token	*get_last_tok(t_token *lst);
