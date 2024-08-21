@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:26:33 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/21 09:47:36 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/21 12:05:38 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,19 +157,7 @@ int	start_executor(t_jobs *job, char **env, char ***temp_vars)
 		if (dup2(saved_stdin, STDIN_FILENO) < 0 || dup2(saved_stdout, STDOUT_FILENO) < 0)
 			return (perror("error restoring stdin and stdout\n"), 127);
 		if (job->next && job->next->type == AND)
-		{
-			if (status != 0)
-			{
-				while (job->next && job->next->type == AND)
-					job = job->next;
-				if (job->next)
-					job = job->next->next;
-				else
-					job = job->next;
-			}
-			else
-				job = job->next->next;
-		}
+			job = job->next->next;
 		else if (job->next && job->next->type == OR)
 		{
 			if (status == 0)
