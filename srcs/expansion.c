@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/09 17:53:14 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/19 08:12:01 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/20 21:56:57 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,8 @@ char	*no_quotes(char *str, t_var_holder *h, char **env, char **temp_vars, int st
 
 char	*single_quotes(char *str, t_var_holder *h)
 {
+	if (!h->new)
+		h->new = ft_strdup("");
 	h->start = ++h->i;
 	while (str[h->i] && str[h->i] != '\'')
 		h->i++;

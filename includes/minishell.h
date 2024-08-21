@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 16:38:21 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/19 22:50:59 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/20 21:43:09 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ typedef struct variable_holder
 	int		j;
 	int		wc;
 	int		k;
+	char 	quote;
 	char	**array;
 }				t_var_holder;
 

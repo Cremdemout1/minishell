@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/19 09:55:35 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/21 09:45:45 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,18 @@ int	count(char *str)
 			i++;
 		if (str[i] == '\0')
 			break ;
+		if (str[i] == '\'' || str[i] == '\"')
+		{
+			char quote = str[i];
+			i++;
+			while (str[i] && str[i] != quote)
+			{
+				count++;
+				i++;
+			}
+			count++;
+		}
+		else
 		if (str[i] == '&' || str[i] == '|' || str[i] == '<' || str[i] == '>')
 		{
 			while (str[i] && (str[i] == '&' || str[i] == '|' || str[i] == '<' || str[i] == '>'))
@@ -71,7 +83,14 @@ char	*split_complex_args(char *str)
 			h.i++;
 		if (str[h.i] == '\0')
 			break ;
-		if (str[h.i] == '&' || str[h.i] == '|' || str[h.i] == '<' || str[h.i] == '>')
+		if (str[h.i] == '\'' || str[h.i] == '\"')
+		{
+			char quote = str[h.i];
+			h.i++;
+			while (str[h.i] && str[h.i] != quote)
+				h.new[h.j++] = str[h.i++];
+		}
+		else if (str[h.i] == '&' || str[h.i] == '|' || str[h.i] == '<' || str[h.i] == '>')
 		{
 			while (str[h.i] && (str[h.i] == '&' || str[h.i] == '|' || str[h.i] == '<' || str[h.i] == '>'))
 				h.new[h.j++] = str[h.i++];

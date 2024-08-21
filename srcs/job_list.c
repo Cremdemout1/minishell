@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/19 22:44:41 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/20 21:51:20 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,12 @@ t_token	*developed_cmdline_tokenization(char *command_line, char **env, int stat
 
 	list = NULL;
 	simplified = split_complex_args(command_line);
-	converted = unquote_and_direct(simplified, env, NULL, status);
+	//converted = unquote_and_direct(simplified, env, NULL, status);
     //change the place when i will impliment expansion to job array so that a quoted string can be seen as an entire string in array
-	free(simplified);
-	tokenize(&list, converted, env, status);
-	free(converted);
+	//free(simplified);
+	tokenize(&list, simplified, env, status);
+    free(simplified);
+	//free(converted);
     //tokenize(&list, command_line, env, status);
 	if (parse(&list) == -1)
 	{
