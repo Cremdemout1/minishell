@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/21 11:48:36 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/21 16:40:58 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,10 @@ t_token	*developed_cmdline_tokenization(char *command_line, char **env, int stat
 	t_token	*list;
 
 	list = NULL;
-	//simplified = split_complex_args(command_line);
+	simplified = split_complex_args(command_line);
 	//free(simplified);
-	//tokenize(&list, simplified, env, status);
-    //free(simplified);
-    tokenize(&list, command_line, env, status);
+	tokenize(&list, simplified, env, status);
+    free(simplified);
 	if (parse(&list) == -1)
 	{
 		clear_list(&list);

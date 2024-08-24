@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   process.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno <bruno@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 19:13:31 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/16 01:28:14 by bruno            ###   ########.fr       */
+/*   Updated: 2024/08/24 12:09:50 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,22 +18,26 @@ int	child_process(t_jobs *job, char **env, char ***temp_vars)
 	int		fd[2];
 	int		status = 0;
 
-	if (ft_strcmp(job->job[0], "cd") == 0)//not really working with multiple jobs
-		return (caught_cd(job, env));
+	if (job->job && job->job[0] && (ft_strcmp(job->job[0], "cd")) == 0) // Not really working with multiple jobs
+    	return (caught_cd(job, env));
 	pipe(fd);
 	pid = new_fork();
 	if (pid == 0)
 	{
 		close(fd[READ]);
-		dup2(fd[WRITE], STDOUT_FILENO);//error check
+		if (job->next && job->next->type == PIPE)
+			dup2(fd[WRITE], STDOUT_FILENO);//error check
 		close(fd[WRITE]);
 		if (try_builtins(job, env, temp_vars) == 200)
 			execute_job(job->job, env);
 	}
-	close(fd[WRITE]);
-	dup2(fd[READ], STDIN_FILENO);//error check
-	close(fd[READ]);
-	waitpid(pid, &status, 0);
+	else
+	{
+		close(fd[WRITE]);
+		dup2(fd[READ], STDIN_FILENO);//error check
+		close(fd[READ]);
+		waitpid(pid, &status, 0);
+	}
 	return (WEXITSTATUS(status));
 }
 
