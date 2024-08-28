@@ -3,81 +3,47 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno <bruno@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/16 00:58:51 by bruno            ###   ########.fr       */
+/*   Updated: 2024/08/28 16:53:41 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/minishell.h"
 
-//add heredoc signal handling
-
-// void    heredoc(char *str)
-// {
-//     int fd;
-//     char *line;
-
-//     if ((fd = open(".heredoc", O_CREAT | O_RDWR, 0644)) < 0)
-//     {
-//         perror("heredoc misconduct");
-//         return ;
-//     }
-//     while (1)
-//     {
-//         line = readline("heredoc> ");
-//         if (ft_strcmp(str, line) == 0)
-//         {
-//             free(line);
-//             break ;
-//         }
-//         ft_putendl_fd(line, fd);
-//         free(line);
-//     }
-//     close (fd);
-// }
-
-// void    start_heredoc(t_jobs *curr)
-// {
-//     int fd;
-// 	char *line;
-    
-//     heredoc(curr->input);
-// 	fd = open(".heredoc", O_RDONLY);
-//     if (fd < 0)
-//     {
-//         perror("error opening heredoc fd");
-//         return ;
-//     }
-//     if (dup2(fd, STDIN_FILENO) < 0)
-//        perror("heredoc dup2 error");
-//     print_file(fd);
-//     close (fd);
-// }
-
-void handle_heredoc(char *delimiter)
+int handle_heredoc(t_jobs *job)
 {
-    int fd;
+    int redirected_input;
     char *line;
-    
-    fd = open(".heredoc", O_CREAT | O_RDWR | O_TRUNC, 0644);
-    if (fd < 0)
+	
+    redirected_input = open(".heredoc", O_CREAT | O_RDWR | O_TRUNC, 0644);
+    if (redirected_input < 0)
+        return -1;
+	if (set_signal(SIGINT, ctrl_c_heredoc) < 0 || set_signal(SIGQUIT, SIG_IGN) < 0)
     {
-        perror("heredoc error opening file");
-        return;
+        perror("heredoc error setting signal");
+        return (-1);
     }
     while ((line = readline("heredoc> ")) != NULL)
     {
-        if (ft_strcmp(line, delimiter) == 0)
+        if (ft_strcmp(line, job->input) == 0)
         {
             free(line);
             break;
         }
-        ft_putendl_fd(line, fd);
+        ft_putendl_fd(line, redirected_input);
         free(line);
     }
-    if (dup2(fd, STDIN_FILENO) < 0)
-        perror("heredoc error duplicating fd");
-    close(fd);
+    close(redirected_input);
+    redirected_input = open(".heredoc", O_RDONLY);
+    if (redirected_input < 0)
+        return -1;
+    if (dup2(redirected_input, STDIN_FILENO) < 0)
+    {
+        close(redirected_input);
+        return -1;
+	}
+    close(redirected_input);
+    return 0;
 }

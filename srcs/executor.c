@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:26:33 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/24 12:18:13 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/28 17:46:37 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,35 +90,6 @@
 
 
 // Yohan's!
- int hand_heredoc(t_jobs *job)
-{
-    int redirected_input;
-    char *line;
-    redirected_input = open(".heredoc", O_CREAT | O_RDWR | O_TRUNC, 0644);
-    if (redirected_input < 0)
-        return -1;
-    while ((line = readline("heredoc> ")) != NULL)
-    {
-        if (ft_strcmp(line, job->input) == 0)
-        {
-            free(line);
-            break;
-        }
-        ft_putendl_fd(line, redirected_input);
-        free(line);
-    }
-    close(redirected_input);
-    redirected_input = open(".heredoc", O_RDONLY);
-    if (redirected_input < 0)
-        return -1;
-    if (dup2(redirected_input, STDIN_FILENO) < 0)
-    {
-        close(redirected_input);
-        return -1;
-	}
-    close(redirected_input);
-    return 0;
-}
 
 int	start_executor(t_jobs *job, char **env, char ***temp_vars)
 {
@@ -140,19 +111,19 @@ int	start_executor(t_jobs *job, char **env, char ***temp_vars)
 		{
 			if (job->heredoc)
 			{
-				if ((redirected_input = hand_heredoc(job)) < 0)
+				if ((redirected_input = handle_heredoc(job)) < 0)
 					return (perror("heredoc error\n"), 127);
 			}
 			else
 			{
 				redirected_input = open(job->input, O_RDONLY);
-				if ((!job->job || !job->job[0]) && !job->output && !job->mult_input_flag && !job->next)
+				/* if ((!job->job || !job->job[0]) && !job->output && !job->mult_input_flag && !job->next)
 				{
 					print_file(redirected_input);
 					close(redirected_input);
 					job = job->next;
-					continue;
-				}
+					continue;			this cop zsh cat behaviour, but it's not needed
+				} */
 				if (redirected_input < 0)
 					perror("input file error\n");
 				if (dup2(redirected_input, STDIN_FILENO) < 0)

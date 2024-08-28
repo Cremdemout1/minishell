@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/19 22:50:15 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/28 17:44:50 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,13 @@ void	ctrl_c_idle(int sig)
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
+}
+
+void	ctrl_c_heredoc(int sig)
+{
+	(void)sig;
+	printf("\n");
+	close(STDIN_FILENO);
 }
 
 void	sigquit(int sig)

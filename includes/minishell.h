@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 16:38:21 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/24 09:46:31 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/28 16:53:49 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,6 @@
 # include <limits.h>
 # include <readline/readline.h>
 # include <readline/history.h>
-
-static volatile sig_atomic_t	sig = 0;
 
 # define WRITE 1
 # define READ 0
@@ -118,7 +116,7 @@ void	panic(char *s);
 void	update_input(t_jobs *job);
 int		update_output(t_jobs *job, char **env, char ***temp_vars);
 int		append_to_file(t_jobs *job, char **env, char ***temp_vars);
-void	handle_heredoc(char *delimiter);
+int 	handle_heredoc(t_jobs *job);
 void    print_file(int fd);
 
 //free:
@@ -160,6 +158,7 @@ void	ctrl_c_idle(int sig);
 int		set_signal(int sig, void f(int));
 void	sigquit(int sig);
 void	ctrl_c(int sig);
+void	ctrl_c_heredoc(int sig);
 
 void	check_exit(char *line);
 

@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 16:43:23 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/18 11:23:03 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/28 16:46:05 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,13 +102,13 @@ int main (int ac, char **av, char **envp)
 	
 	while (1)
 	{
-		prompt = update_prompt();
 		if (set_signal(SIGINT, ctrl_c_idle) < 0 || set_signal(SIGQUIT, SIG_IGN) < 0)
 		{
 			free(prompt);
 			ft_printf("Error: signal\n");
 			return 1;
 		}
+		prompt = update_prompt();
 		line = readline(prompt);
 		free(prompt);
 		if (!line || !line[0])
