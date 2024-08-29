@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/11 17:26:33 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/28 17:46:37 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/29 15:38:58 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,36 +98,25 @@ int	start_executor(t_jobs *job, char **env, char ***temp_vars)
 	int saved_stdout = dup(STDOUT_FILENO);
 	int redirected_input;
 	int redirected_output;
- 	if (set_signal(SIGINT, ctrl_c) < 0 || set_signal(SIGQUIT, sigquit) < 0)
-	{
-		ft_printf("Error: signal\n");
-		clear_jobs(&job);
-		free_array(env);
-		exit(1);
-	}
+	signal(SIGINT, handle_signal_child);
+	signal(SIGQUIT, sigquit);
 	while (job)
 	{
+		caught_exit(job, status);
 		if (job->input)
 		{
 			if (job->heredoc)
 			{
 				if ((redirected_input = handle_heredoc(job)) < 0)
-					return (perror("heredoc error\n"), 127);
+					return (127);
 			}
 			else
 			{
 				redirected_input = open(job->input, O_RDONLY);
-				/* if ((!job->job || !job->job[0]) && !job->output && !job->mult_input_flag && !job->next)
-				{
-					print_file(redirected_input);
-					close(redirected_input);
-					job = job->next;
-					continue;			this cop zsh cat behaviour, but it's not needed
-				} */
 				if (redirected_input < 0)
 					perror("input file error\n");
 				if (dup2(redirected_input, STDIN_FILENO) < 0)
-					return (perror("error duping input\n"), 127);
+					status = 127;
 				close (redirected_input);
 			}
 		}
@@ -144,7 +133,7 @@ int	start_executor(t_jobs *job, char **env, char ***temp_vars)
 			if (redirected_output < 0)
 				perror("output file error\n");
 			if (dup2(redirected_output, STDOUT_FILENO) < 0)
-				return (perror("error duping output\n"), 127);
+				status = 127;
 			close(redirected_output);
 		}
 		if (job->next && job->next->type == PIPE)
@@ -154,25 +143,28 @@ int	start_executor(t_jobs *job, char **env, char ***temp_vars)
 			continue;
 		}
 		if (job->job && job->job[0])
+		{
+			// close(saved_stdin);
+			// close(saved_stdout);
 			status = simple_process(job, env, temp_vars);
-			
+		}	
 		if (dup2(saved_stdin, STDIN_FILENO) < 0 || dup2(saved_stdout, STDOUT_FILENO) < 0)
-			return (perror("error restoring stdin and stdout\n"), 127);
+			status = 127;
 		if (job->next && job->next->type == AND)
 			job = job->next->next;
 		else if (job->next && job->next->type == OR)
 		{
 			if (status == 0)
 			{
-				while (job->next && job->next->type == OR)
-					job = job->next;
+				while(job->next && job->next->type == OR)
+					job = job->next->next;
 				if (job->next)
 					job = job->next->next;
 				else
-					job = job->next;
+				job = job->next;
 			}
 			else
-				job = job->next->next;
+				job = job->next;
 		}
 		else
 			job = job->next;
@@ -183,3 +175,96 @@ int	start_executor(t_jobs *job, char **env, char ***temp_vars)
 	close(saved_stdout);
 	return status;
 }
+
+// int	start_executor(t_jobs *job, char **env, char ***temp_vars)
+// {
+// 	int status = 0;
+// 	int saved_stdin = dup(STDIN_FILENO);
+// 	int saved_stdout = dup(STDOUT_FILENO);
+// 	int redirected_input;
+// 	int redirected_output;
+
+// 	// Set default signal handlers
+// 	signal(SIGINT, handle_signal_child);
+// 	signal(SIGQUIT, sigquit);
+
+// 	while (job)
+// 	{
+// 		caught_exit(job, status);
+
+// 		if (job->input)
+// 		{
+// 			if (job->heredoc)
+// 			{
+// 				if ((redirected_input = handle_heredoc(job)) < 0)
+// 					return (127);
+// 			}
+// 			else
+// 			{
+// 				redirected_input = open(job->input, O_RDONLY);
+// 				if (redirected_input < 0)
+// 					perror("input file error");
+// 				if (dup2(redirected_input, STDIN_FILENO) < 0)
+// 					status = 127;
+// 				close(redirected_input);
+// 			}
+// 		}
+
+// 		if (job->output)
+// 		{
+// 			if (job->append)
+// 				redirected_output = open(job->output, O_CREAT | O_APPEND | O_RDWR, 0644);
+// 			else
+// 			{
+// 				if (access(job->output, F_OK) == 0)
+// 					remove(job->output);
+// 				redirected_output = open(job->output, O_CREAT | O_RDWR, 0644);
+// 			}
+// 			if (redirected_output < 0)
+// 				perror("output file error");
+// 			if (dup2(redirected_output, STDOUT_FILENO) < 0)
+// 				status = 127;
+// 			close(redirected_output);
+// 		}
+
+// 		if (job->next && job->next->type == PIPE)
+// 		{
+// 			status = child_process(job, env, temp_vars);
+// 			job = job->next->next;
+// 			continue;
+// 		}
+
+// 		if (job->job && job->job[0])
+// 		{
+// 			status = simple_process(job, env, temp_vars);
+// 		}	
+
+// 		if (dup2(saved_stdin, STDIN_FILENO) < 0 || dup2(saved_stdout, STDOUT_FILENO) < 0)
+// 			status = 127;
+
+// 		// Handle job continuation based on logical operators
+// 		if (job->next && job->next->type == AND)
+// 			job = job->next->next;
+// 		else if (job->next && job->next->type == OR)
+// 		{
+// 			if (status == 0)
+// 			{
+// 				while (job->next && job->next->type == OR)
+// 					job = job->next->next;
+// 				job = (job->next) ? job->next->next : job->next;
+// 			}
+// 			else
+// 				job = job->next;
+// 		}
+// 		else
+// 			job = job->next;
+// 	}
+
+// 	if (access(".heredoc", F_OK) == 0)
+// 		remove(".heredoc");
+
+// 	close(saved_stdin);
+// 	close(saved_stdout);
+
+// 	return status;
+// }

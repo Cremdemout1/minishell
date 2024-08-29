@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/28 16:53:41 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/29 14:59:36 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,12 @@ int handle_heredoc(t_jobs *job)
 {
     int redirected_input;
     char *line;
-	
+    
     redirected_input = open(".heredoc", O_CREAT | O_RDWR | O_TRUNC, 0644);
     if (redirected_input < 0)
         return -1;
-	if (set_signal(SIGINT, ctrl_c_heredoc) < 0 || set_signal(SIGQUIT, SIG_IGN) < 0)
-    {
-        perror("heredoc error setting signal");
-        return (-1);
-    }
+    signal(SIGINT, handle_signal_heredoc);
+    signal(SIGQUIT, SIG_IGN);
     while ((line = readline("heredoc> ")) != NULL)
     {
         if (ft_strcmp(line, job->input) == 0)

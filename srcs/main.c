@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 16:43:23 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/28 16:46:05 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/29 15:22:33 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,12 +102,11 @@ int main (int ac, char **av, char **envp)
 	
 	while (1)
 	{
-		if (set_signal(SIGINT, ctrl_c_idle) < 0 || set_signal(SIGQUIT, SIG_IGN) < 0)
-		{
-			free(prompt);
-			ft_printf("Error: signal\n");
-			return 1;
-		}
+		//set_signal(SIGINT, ctrl_c_idle);
+		//set_signal(SIGQUIT, SIG_IGN);
+		//setup_signals(MAIN);
+		signal(SIGINT, handle_signal_main);
+		signal(SIGQUIT, SIG_IGN);
 		prompt = update_prompt();
 		line = readline(prompt);
 		free(prompt);
@@ -116,17 +115,12 @@ int main (int ac, char **av, char **envp)
 			free(line);
 			continue ;
 		}
-		if (ft_strcmp(line, "exit") == 0)
-		{
-			free(line);
-			break ;
-		}
 		add_history(line);
 		line = parse_quotes(line);
 		jobs = build(line, env, status);
 		curr = jobs;
 		start_executor(curr, env, &temp_vars);
-		clear_jobs(&jobs);	//jobs are acc cleared
+		clear_jobs(&jobs);
 	}
 	return (0);
 }

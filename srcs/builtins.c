@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/03 18:15:45 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/24 10:06:03 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/29 15:39:52 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,12 @@ void	cd_update_pwd(char **env, bool when)
 		env[i] = ft_strjoin("PWD=", temp);//error check
 	}
 }
+
+void	caught_exit(t_jobs *job, int status)
+{
+	if (job->job && job->job[0] && ft_strcmp(job->job[0], "exit") == 0)
+		exit(status);
+}
 // int	caught_cd(t_jobs *job, char **env)//cd supposedly cant exit process, needs to be called before fork
 // {//check return values
 // 	char 	*directory;
@@ -159,32 +165,59 @@ int	caught_env(t_jobs *job, char **env)//make better
 	return (0);
 }
 //echo
-int	caught_echo(t_jobs *job)
-{
-	bool	nl;
+// int	caught_echo(t_jobs *job)
+// {
+// 	bool	nl;
 
-	if (!job->job[1])
-		return (ft_nl_fd(1), 0);
+// 	if (!job->job[1])
+// 		return (ft_nl_fd(1), 0);
+// 	nl = true;
+// 	if (ft_strncmp(job->job[0], "echo -n ", 8) == 0)
+// 		nl = false;
+// 	else if (ft_strncmp(job->job[0], "echo -n", 7) == 0)
+// 		ft_printf("%s", job->job[0] + 5);
+// 	else
+// 	{
+// 		int i;
+
+// 		i = 1;
+// 		while(job->job[i])
+// 		{
+// 			ft_printf("%s", job->job[i]);
+// 			if (job->job[i + 1])
+// 				ft_printf(" ");
+// 			i++;
+// 		}
+// 	}
+// 	if (nl == true)
+// 		ft_nl_fd(1);
+// 	exit (0);
+// }
+int caught_echo(t_jobs *job)
+{
+	bool nl;
+	
 	nl = true;
-	if (ft_strncmp(job->job[0], "echo -n ", 8) == 0)
+	if (!job->job[1])
+	{
+		ft_printf("\n");
+		exit (0);
+	}
+	if (ft_strcmp(job->job[1], "-n") == 0)
 		nl = false;
-	else if (ft_strncmp(job->job[0], "echo -n", 7) == 0)
-		ft_printf("%s", job->job[0] + 5);
 	else
 	{
 		int i;
 
 		i = 1;
-		while(job->job[i])
+		while (job->job[i])
 		{
 			ft_printf("%s", job->job[i]);
-			if (job->job[i + 1])
-				ft_printf(" ");
 			i++;
-		}
+		}	
 	}
 	if (nl == true)
-		ft_nl_fd(1);
+		ft_printf("\n");
 	exit (0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 16:38:21 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/28 16:53:49 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/29 15:43:00 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,15 @@ typedef enum s_types
 	APPEND_OUT,
 	EXPORT
 }			t_types;
+
+typedef enum s_context
+{
+	MAIN,
+	CHILD,
+	HDOC,
+	IGNORE,
+	MAIN2
+}		t_context;
 
 typedef struct variable_holder
 {
@@ -92,6 +101,8 @@ int		caught_pwd(t_jobs *job, char **env);
 int		caught_env(t_jobs *job, char **env);
 int		caught_unset(t_jobs *job, char **env, char **temp_vars);
 int		caught_export(t_jobs *job, char **env, char **temp_vars);
+void	caught_exit(t_jobs *job, int status);
+
 
 //prompt:
 char	*update_prompt(void);
@@ -154,12 +165,9 @@ void	make_job_list(t_jobs **job_list, t_token **tok_list, char **env);
 t_jobs	*build(char *command_line, char **env, int status);
 
 //signals:
-void	ctrl_c_idle(int sig);
-int		set_signal(int sig, void f(int));
-void	sigquit(int sig);
-void	ctrl_c(int sig);
-void	ctrl_c_heredoc(int sig);
-
-void	check_exit(char *line);
+void sigquit(int sig);
+void handle_signal_main(int sig);
+void handle_signal_child(int sig);
+void handle_signal_heredoc(int sig);
 
 #endif
