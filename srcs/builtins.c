@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/03 18:15:45 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/29 15:39:52 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/29 18:22:26 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,8 @@ void	cd_update_pwd(char **env, bool when)
 
 void	caught_exit(t_jobs *job, int status)
 {
+	if (!job->job)
+		return ;
 	if (job->job && job->job[0] && ft_strcmp(job->job[0], "exit") == 0)
 		exit(status);
 }
@@ -196,25 +198,26 @@ int	caught_env(t_jobs *job, char **env)//make better
 int caught_echo(t_jobs *job)
 {
 	bool nl;
+	int i;
 	
 	nl = true;
+	i = 1;
 	if (!job->job[1])
 	{
 		ft_printf("\n");
 		exit (0);
 	}
 	if (ft_strcmp(job->job[1], "-n") == 0)
-		nl = false;
-	else
 	{
-		int i;
-
-		i = 1;
-		while (job->job[i])
-		{
-			ft_printf("%s", job->job[i]);
-			i++;
-		}	
+		nl = false;
+		i++;
+	}
+	while (job->job[i])
+	{
+		ft_printf("%s", job->job[i]);
+		if (job->job[i + 1])
+			ft_printf(" ");
+		i++;
 	}
 	if (nl == true)
 		ft_printf("\n");

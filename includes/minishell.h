@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 16:38:21 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/29 15:43:00 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/29 22:32:41 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,11 +144,17 @@ void	print_jobs(t_jobs *jobs);
 int		parse(t_token **token);
 char	*parse_quotes(char *line);
 int		parse_last_token(char **cmd_line, t_token **list, t_token **last);
+int		secondquote(char *line);
+
+
+//error_correction:
+int		count_quotes(char *str, int *i);
+int 	count_normal_chars(char *str, int *i);
+int		count_special_chars(char *str, int *i);
+char 	*split_complex_args(char *str);
+
 
 //tokenizer:
-int		count(char *str);
-char	*split_complex_args(char *str);
-int		assign_i(char *str, int i);
 int		count_words(char *str);
 char	**token_array(char *str);
 void	tokenize(t_token **list, char *str, char **env, int status);
@@ -156,13 +162,15 @@ int		define_type(char *str);
 t_token	*addtok(void *content);
 t_token	*get_last_tok(t_token *lst);
 void	go_to_next(t_token **lst, t_token *new);
+void	modify_array(char **array, char **env, char **temp_vars);
 
-//job list:
+//lexer:
 t_jobs	*addjob(void *content);
 t_jobs	*get_last_job(t_jobs *lst);
 void	go_to_next_job(t_jobs **lst, t_jobs *new);
 void	make_job_list(t_jobs **job_list, t_token **tok_list, char **env);
 t_jobs	*build(char *command_line, char **env, int status);
+int		count_tokens_in_job(t_token *cur);
 
 //signals:
 void sigquit(int sig);

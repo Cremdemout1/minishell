@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 16:43:23 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/29 15:22:33 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/29 22:34:03 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,9 +102,6 @@ int main (int ac, char **av, char **envp)
 	
 	while (1)
 	{
-		//set_signal(SIGINT, ctrl_c_idle);
-		//set_signal(SIGQUIT, SIG_IGN);
-		//setup_signals(MAIN);
 		signal(SIGINT, handle_signal_main);
 		signal(SIGQUIT, SIG_IGN);
 		prompt = update_prompt();
@@ -113,6 +110,12 @@ int main (int ac, char **av, char **envp)
 		if (!line || !line[0])
 		{
 			free(line);
+			continue ;
+		}
+		if (secondquote(line) == 1)	//remove if you want to request additional info to finish prompt
+		{
+			free(line);
+			ft_printf("error: unclosed quote\n");
 			continue ;
 		}
 		add_history(line);

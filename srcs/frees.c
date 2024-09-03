@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/28 15:18:01 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/18 10:50:24 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/08/29 22:34:42 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,23 +16,6 @@ void	clean_up_build(t_token **list, char *cmd_line)
 {
 	clear_list(list);
 	free(cmd_line);
-}
-
-void	clean_exit(t_jobs *jobs, char *line, char *prompt)
-{
-	if (jobs)
-		clear_jobs(&jobs);
-	else
-		(void)jobs;
-	if (line)
-		free (line);
-	else
-		(void)line;
-	if (prompt)
-		free (prompt);
-	else
-		(void)prompt;
-	exit (0);
 }
 
 void	clear_list(t_token **lst)
