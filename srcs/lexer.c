@@ -59,11 +59,30 @@ t_jobs	*build(char *command_line, char **env, int status)
 void	apply_redir(t_token *current, t_jobs *job)
 {
 	int	fd;
+	char *temp = NULL;
 
-	if (current->type == INPUT || current->type == HEREDOC)
+	if (current->type == HEREDOC)
 	{
-		if (current->type == HEREDOC)
-			job->heredoc = 1;
+		job->heredoc = 1;
+		if (job->delimiters)
+		{
+			temp = ft_strjoin(job->delimiters, " ");
+			free(job->delimiters);
+			job->delimiters = ft_strjoin(temp, current->next->token);
+			free(temp);
+			temp = ft_strjoin(job->delimiters, " ");
+			free(job->delimiters);
+			job->delimiters = ft_strdup(temp);
+			free(temp);
+		}
+		else
+			job->delimiters = ft_strjoin(current->next->token, " ");
+		if (job->input)
+			free(job->input);
+		job->input = ft_strdup(".heredoc");
+	}
+	if (current->type == INPUT)
+	{
 		if (job->input)
 		{
 			job->mult_input_flag = 1;
@@ -71,7 +90,7 @@ void	apply_redir(t_token *current, t_jobs *job)
 		}
 		job->input = ft_strdup(current->next->token);
 	}
-	else if (current->type == OUTPUT || current->type == APPEND_OUT)
+	if (current->type == OUTPUT || current->type == APPEND_OUT)
 	{
 		fd = open(current->next->token, O_CREAT | O_RDWR, 0644);
 		close(fd);

@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 16:38:21 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/29 22:32:41 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/09/06 10:15:17 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,7 @@ typedef struct s_jobs
 	char			**job;
 	char			*input;
 	char			*output;
+	char			*delimiters;
 	int				append;
 	int				heredoc;
 	int				mult_input_flag;
