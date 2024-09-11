@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/28 16:52:00 by ycantin           #+#    #+#             */
-/*   Updated: 2024/08/29 18:09:59 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/09/11 11:32:14 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ int	define_type(char *str)
 	return (type);
 }
 
-void	modify_array(char **array, char **env, char **temp_vars)
+void	modify_array(char **array, t_env env)
 {
 	int		i;
 	char	*temp;
@@ -77,7 +77,7 @@ void	modify_array(char **array, char **env, char **temp_vars)
 	i = 0;
 	while (array[i])
 	{
-		temp = unquote_and_direct(array[i], env, temp_vars, 0);
+		temp = unquote_and_direct(array[i], env);
 		free(array[i]);
 		array[i] = temp;
 		i++;

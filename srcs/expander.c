@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   expander.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno <bruno@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 03:18:24 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/08 22:40:28 by bruno            ###   ########.fr       */
+/*   Updated: 2024/09/11 11:33:32 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-char	*expand_env_vars(char *input, char **env, char **temp_vars)//take care of $$
+char	*expand_env_vars(char *input, t_env env)//take care of $$
 {
 	int 	i;
 	bool	flag = false;
@@ -31,9 +31,7 @@ char	*expand_env_vars(char *input, char **env, char **temp_vars)//take care of $
 			flag = false;// dont hardcode like this
 		else
 		{
-			temp = ft_getenv(vars[i], env);//error check
-			if (!temp)
-				temp = ft_getenv(vars[i], temp_vars);//error check
+			temp = ft_getenv(vars[i], env.env);//error check
 			vars[i] = temp;
 		}
 		if (vars[i])

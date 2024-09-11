@@ -12,7 +12,7 @@
 
 #include "../includes/minishell.h"
 
-void	tokenize(t_token **list, char *str, char **env, int status)
+void	tokenize(t_token **list, char *str, t_env env)
 {
 	int		i;
 	char	**array;
@@ -21,7 +21,7 @@ void	tokenize(t_token **list, char *str, char **env, int status)
 
 	i = 0;
 	array = token_array(str);
-	modify_array(array, env, NULL);
+	//modify_array(array, env, NULL);
 	if (!array)
 		return ;
 	while (array[i])

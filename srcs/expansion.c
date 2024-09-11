@@ -6,13 +6,13 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/09 17:53:14 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/29 19:03:33 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/09/11 12:03:40 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-char	*expand(char *str, char **env, char **temp_vars, int status)
+char	*expand(char *str, t_env env)
 {
 	t_var_holder	h;
 
@@ -32,18 +32,18 @@ char	*expand(char *str, char **env, char **temp_vars, int status)
 		{
 			h.start = h.i;
 			h.i++;
-			h.result = expansion(str, &h, env, temp_vars, status);
+			h.result = expansion(str, &h, env);
 		}
 	}
 	return (h.result);
 }
 
-char	*no_quotes(char *str, t_var_holder *h, char **env, char **temp_vars, int status)
+char	*no_quotes(char *str, t_var_holder *h, t_env env)
 {
 	h->temp = ft_strndup(str + h->start, h->i - h->start);
 	if (!h->temp)
 		return h->new;
-	h->before = expand(h->temp, env, temp_vars, status);
+	h->before = expand(h->temp, env);
 	free(h->temp);
 	if (!h->before)
 		return h->new;
@@ -81,16 +81,16 @@ char	*single_quotes(char *str, t_var_holder *h)
 	return (h->new);
 }
 
-char *double_quotes(char *str, t_var_holder *h, char **env, char **temp_vars, int status)
+char *double_quotes(char *str, t_var_holder *h, t_env env)
 {
     h->start = ++h->i;
     while (str[h->i] && str[h->i] != '\"')
         h->i++;
-    h->new = no_quotes(str, h, env, temp_vars, status);
+    h->new = no_quotes(str, h, env);
     return (h->new);
 }
 
-char *unquote_and_direct(char *str, char **env, char **temp_vars, int status)
+char *unquote_and_direct(char *str, t_env env)
 {
     t_var_holder h;
 
@@ -107,25 +107,23 @@ char *unquote_and_direct(char *str, char **env, char **temp_vars, int status)
         while (str[h.i] && str[h.i] != '\'' && str[h.i] != '\"')
             h.i++;
         if (h.i > h.start) 
-            h.new = no_quotes(str, &h, env, temp_vars, status);
+            h.new = no_quotes(str, &h, env);
         if (str[h.i] == '\'')
             h.new = single_quotes(str, &h);
         else if (str[h.i] == '\"') 
-            h.new = double_quotes(str, &h, env, temp_vars, status);
+            h.new = double_quotes(str, &h, env);
         if (str[h.i])
             h.i++;
     }
     return (h.new);
 }
 
-char	*expand_env_vars(char *input, char **env, char **temp_vars)
+char	*expand_env_vars(char *input, t_env env)
 {
 	char	*temp;
 
 	temp = NULL;
-	temp = ft_getenv(input + 1, env);
-	if (!temp && temp_vars)
-		temp = ft_getenv(input, temp_vars);
+	temp = ft_getenv(input + 1, env.env);
 	if (!temp)
 		temp = ft_strdup("");
 	return temp;
@@ -147,7 +145,7 @@ char	*no_expansion(char *str, t_var_holder h)
 	return(h.temp);
 }
 
-char	*expansion(char *str, t_var_holder *h, char **env, char **temp_vars, int status)
+char	*expansion(char *str, t_var_holder *h, t_env env)
 {
 	if (str[h->i] == '\0' || str[h->i] == ' ' || str[h->i] == '\t')
 		h->expanded = ft_strdup("$");
@@ -158,7 +156,7 @@ char	*expansion(char *str, t_var_holder *h, char **env, char **temp_vars, int st
 	}
 	else if (str[h->i] == '?')
 	{
-		h->expanded = ft_itoa(status);
+		h->expanded = ft_itoa(env.status);
 		h->i++;
 	}
 	else
@@ -166,7 +164,7 @@ char	*expansion(char *str, t_var_holder *h, char **env, char **temp_vars, int st
 		while (str[h->i] && (ft_isalnum(str[h->i]) || str[h->i] == '_'))
 			h->i++;
 		h->temp2 = ft_strndup(str + h->start, h->i - h->start);
-		h->expanded = expand_env_vars(h->temp2, env, temp_vars);
+		h->expanded = expand_env_vars(h->temp2, env);
 		free(h->temp2);
 	}
 	h->temp = ft_strjoin(h->result, h->expanded);

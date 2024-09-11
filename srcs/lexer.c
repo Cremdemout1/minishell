@@ -12,8 +12,7 @@
 
 #include "../includes/minishell.h"
 
-t_token	*developed_cmdline_tokenization(
-	char *command_line, char **env, int status)
+t_token	*developed_cmdline_tokenization(char *command_line, t_env env)
 {
 	char	*converted;
 	char	*simplified;
@@ -21,7 +20,7 @@ t_token	*developed_cmdline_tokenization(
 
 	list = NULL;
 	simplified = split_complex_args(command_line);
-	tokenize(&list, simplified, env, status);
+	tokenize(&list, simplified, env);
 	free(simplified);
 	if (parse(&list) == -1)
 	{
@@ -31,7 +30,7 @@ t_token	*developed_cmdline_tokenization(
 	return (list);
 }
 
-t_jobs	*build(char *command_line, char **env, int status)
+t_jobs	*build(char *command_line, t_env env)
 {
 	t_jobs	*jobs;
 	t_token	*list;
@@ -40,7 +39,7 @@ t_jobs	*build(char *command_line, char **env, int status)
 	jobs = NULL;
 	list = NULL;
 	last = NULL;
-	list = developed_cmdline_tokenization(command_line, env, status);
+	list = developed_cmdline_tokenization(command_line, env);
 	if (parse(&list) == -1)
 	{
 		clear_list(&list);
@@ -65,21 +64,13 @@ void	apply_redir(t_token *current, t_jobs *job)
 	{
 		job->heredoc = 1;
 		if (job->delimiters)
-		{
-			temp = ft_strjoin(job->delimiters, " ");
 			free(job->delimiters);
-			job->delimiters = ft_strjoin(temp, current->next->token);
-			free(temp);
-			temp = ft_strjoin(job->delimiters, " ");
-			free(job->delimiters);
-			job->delimiters = ft_strdup(temp);
-			free(temp);
-		}
-		else
-			job->delimiters = ft_strjoin(current->next->token, " ");
+		job->delimiters = ft_strdup(current->next->token);
 		if (job->input)
 			free(job->input);
-		job->input = ft_strdup(".heredoc");
+		job->input = ft_strdup(job->heredoc_file);
+		if (handle_heredoc(job) < 0)
+			printf ("error handling heredocs\n");
 	}
 	if (current->type == INPUT)
 	{
@@ -102,7 +93,7 @@ void	apply_redir(t_token *current, t_jobs *job)
 	}
 }
 
-char	**job_array(t_token **cur, t_jobs **job, char **env)
+char	**job_array(t_token **cur, t_jobs **job, t_env env)
 {
 	int		i;
 	char	**array;
@@ -130,12 +121,25 @@ char	**job_array(t_token **cur, t_jobs **job, char **env)
 	return (array[i] = NULL, array);
 }
 
-void	make_job_list(t_jobs **job_list, t_token **tok_list, char **env)
+char *filename(int i)
+{
+	char *num;
+	char *full;
+
+	num = ft_itoa(i);
+	full = ft_strjoin(".heredoc_", num);
+	free(num);
+	return (full);
+}
+
+void	make_job_list(t_jobs **job_list, t_token **tok_list, t_env env)
 {
 	t_token	*cur;
 	t_jobs	*new;
 	char	*cmd;
+	int		i;
 
+	i = 0;
 	cur = *tok_list;
 	while (cur)
 	{
@@ -151,8 +155,10 @@ void	make_job_list(t_jobs **job_list, t_token **tok_list, char **env)
 			cur = cur->next;
 			continue ;
 		}
+		new->heredoc_file = filename(i);
 		new->job = job_array(&cur, &new, env);
 		new->type = WORD;
 		go_to_next_job(job_list, new);
+		i++;
 	}
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno <bruno@student.42.fr>                +#+  +:+       +#+        */
+/*   By: brfernan <brfernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/12 12:58:00 by yohan             #+#    #+#             */
-/*   Updated: 2024/08/07 17:21:05 by bruno            ###   ########.fr       */
+/*   Updated: 2024/09/05 15:18:45 by brfernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,5 +106,8 @@ int		ft_arraycmp(char **arr1, char **arr2);
 int		ft_envnamecmp(char *s1, char *s2);
 char	*get_next_line(int fd);
 char	*gnl_ft_strjoin(char *line, char *buf);
+char	*ft_strjoin3(char const *s1, char const *s2, char const *s3);
+int	ft_isalphaund(int input);
+int	ft_isalnumund(int input);
 
 #endif

@@ -6,11 +6,19 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/03 18:15:45 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/29 18:22:26 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/09/11 12:21:09 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+void	clean_exit(t_jobs *jobs, t_env env, int status)
+{
+	clear_jobs(&jobs);//in case it fails, it doesnt need freeing
+	free_array(env.env);
+	//rl clear history
+	exit (status);
+}
 
 int	declare_temp_vars(t_jobs *job, char **env, char ***temp_vars)
 {
@@ -24,26 +32,25 @@ int	declare_temp_vars(t_jobs *job, char **env, char ***temp_vars)
 	return (0);
 }
 
-int	try_builtins(t_jobs *job, char **env, char ***temp_vars)
+int	try_builtins(t_jobs *job, t_env env, bool pipe)//wtf is bool pipe
 {
-	if (ft_strcmp(job->job[0], "echo") == 0)
-		return (caught_echo(job));
-	else if (ft_strcmp(job->job[0], "env") == 0)
-		return (caught_env(job, env));
+	int	status;
+
+	status = 200;
+	if (ft_strcmp(job->job[0], "export") == 0)
+		status = caught_export(job, env);
+	else if (ft_strcmp(job->job[0], "echo") == 0)
+		status = caught_echo(job);
 	else if (ft_strcmp(job->job[0], "pwd") == 0)
-		return (caught_pwd(job, env));
-/* 	else if (ft_strcmp(job->job[0], "unset") == 0)//has to unset temp_vars as well
-		return (caught_unset(job, env, &temp_vars)); */
-	else if (ft_strchr(job->job[0], '='))
-		return (declare_temp_vars(job, env, temp_vars));
-/* 	else if (ft_strcmp(job->job[0], "export") == 0)//"hello=world && export hello=mi", which stays?
-		return (caught_export(job, env, temp_vars)); */
-	return (200);//check if builtins fail, everything goes correct
+		status = caught_pwd(job);
+	else if (ft_strcmp(job->job[0], "unset") == 0)
+		status = caught_unset(job, env);
+	else if (ft_strcmp(job->job[0], "env") == 0)
+		status = caught_env(job, env);
+	if (pipe)
+		clean_exit(job, env, status);//use some other function
+	return (status);
 }
-
-
-
-
 
 //has to unset temp_vars
 int	unset_aux(char **to_remove, char **env)
@@ -66,14 +73,13 @@ int	unset_aux(char **to_remove, char **env)
 	return (0);
 }
 
-int	caught_unset(t_jobs *job, char **env, char **temp_vars)//segfault if var doesnt exist
+int	caught_unset(t_jobs *job, t_env env)//segfault if var doesnt exist
 {
 	int		i;
 	char	**to_remove;
 
 	to_remove = ft_split(job->job[1], ' ');//error check and make sure job->job is not null
-	if (unset_aux(to_remove, env))
-		unset_aux(to_remove, temp_vars);
+	unset_aux(to_remove, env.env);
 	return (0);
 }
 // cd 
@@ -99,14 +105,40 @@ void	cd_update_pwd(char **env, bool when)
 		env[i] = ft_strjoin("PWD=", temp);//error check
 	}
 }
-
-void	caught_exit(t_jobs *job, int status)
+bool	parse_digit(char *str)
 {
-	if (!job->job)
-		return ;
-	if (job->job && job->job[0] && ft_strcmp(job->job[0], "exit") == 0)
-		exit(status);
+	int	i;
+
+	i = 0;
+	if (str[0] == '-')
+		i++;
+	while (str[i])
+	{
+		if ((str[i] < '0' || str[i] > '9') || str[i] == '-')
+			return (false);
+		i++;
+	}
+	return (true);
 }
+
+int	caught_exit(t_jobs *job, t_env env)//send
+{
+	printf("exit\n");
+	if (job->job[1])
+	{
+		if (!parse_digit(job->job[1]))
+		{
+			ft_printf_fd(2, "minishell: exit: %s: numeric argument required\n", job->job[1]);
+			rl_clear_history();
+			clean_exit(job, env, 2);
+		}
+		if (job->job[2])
+			return (ft_printf_fd(2, "minishell: exit: too many arguments\n"), 1);
+	}
+	rl_clear_history();
+	clean_exit(job, env, 0);
+}
+
 // int	caught_cd(t_jobs *job, char **env)//cd supposedly cant exit process, needs to be called before fork
 // {//check return values
 // 	char 	*directory;
@@ -124,15 +156,15 @@ void	caught_exit(t_jobs *job, int status)
 // 	return (0);
 // }
 
-int    caught_cd(t_jobs *job, char **env)//cd supposedly cant exit process, needs to be called before fork
+int    caught_cd(t_jobs *job, t_env env)//cd supposedly cant exit process, needs to be called before fork
 {//check return values
     char     *directory;
     char    *error;
     
-    cd_update_pwd(env, BEFORE);
+    cd_update_pwd(env.env, BEFORE);
      if (!job->job[1])
     {
-        if (chdir(ft_getenv("HOME", env)) < 0)//return this
+        if (chdir(ft_getenv("HOME", env.env)) < 0)//return this
             return (ft_putendl_fd("cd home failed", 2), 1);// * need to fix perror
     }
     else
@@ -144,11 +176,11 @@ int    caught_cd(t_jobs *job, char **env)//cd supposedly cant exit process, need
             return (perror(error), 1);// * need to fix perror
         }
     }
-    cd_update_pwd(env, AFTER);
+    cd_update_pwd(env.env, AFTER);
     return (0);
 }
 //env
-int	caught_env(t_jobs *job, char **env)//make better
+int	caught_env(t_jobs *job, t_env env)//make better
 {//env SHELL var has to be different
 	int	i;
 
@@ -158,9 +190,9 @@ int	caught_env(t_jobs *job, char **env)//make better
 		return (126);
 	}
 	i = 0;
-	while (env[i])
+	while (env.env[i])
 	{
-		ft_putstr_fd(env[i], 1);
+		ft_putstr_fd(env.env[i], 1);
 		ft_nl_fd(1);
 		i++;
 	}
@@ -195,36 +227,30 @@ int	caught_env(t_jobs *job, char **env)//make better
 // 		ft_nl_fd(1);
 // 	exit (0);
 // }
-int caught_echo(t_jobs *job)
+int	caught_echo(t_jobs *job)
 {
-	bool nl;
-	int i;
-	
-	nl = true;
+	bool	nl;
+	int		i;
+
 	i = 1;
 	if (!job->job[1])
-	{
-		ft_printf("\n");
-		exit (0);
-	}
+		return (ft_nl_fd(1), 0);
 	if (ft_strcmp(job->job[1], "-n") == 0)
-	{
-		nl = false;
 		i++;
-	}
 	while (job->job[i])
 	{
-		ft_printf("%s", job->job[i]);
+		if (job->job[i][0])
+			ft_printf("%s", job->job[i]);
 		if (job->job[i + 1])
 			ft_printf(" ");
 		i++;
 	}
-	if (nl == true)
+	if (ft_strcmp(job->job[1], "-n"))
 		ft_printf("\n");
-	exit (0);
+	return (0);
 }
 
-int	caught_pwd(t_jobs *job, char **env)//make better
+int	caught_pwd(t_jobs *job)//make better
 {
 	char buf[PATH_MAX];
 
@@ -247,48 +273,107 @@ void	check_exit(char *line)// wrong for job[0]1 | exit
 	}
 }
 
-int	caught_export(t_jobs *job, char **env, char **temp_vars)
-{//take care of env-i
-/* 	char	**vars = NULL;
-	char	*temp = NULL;
-	char	**new_env = NULL;
-	int		i;
-	int		j;
 
-	if (ft_strnstr(job->job[1], "=", ft_strlen(job->job[1])))
+bool	is_in_env(char *to_add, char **env)
+{
+	int	i;
+	char	*temp1 = NULL;
+	char	*temp2 = NULL;
+
+	if (!to_add || !env)
+		return false;
+	i = 0;
+	temp1 = ft_substr(to_add, 0, len_to_equal(to_add));
+	while (env[i])
 	{
-		if (!job->job[1])
-			return (caught_env(job, env));
-		vars = ft_split(job->job[1], ' ');//error check
-		new_env = add_to_env(vars, env);//errorcheck and free
-		i = 0;
-		while (new_env[i])
+		temp2 = ft_substr(env[i], 0, len_to_equal(env[i]));
+		if (ft_strcmp(temp1, temp2) == 0)
 		{
-			env[i] = ft_strdup(new_env[i]);//errorcheck and free
-			i++;
+            free(temp1);
+            free(temp2);
+			env[i] = ft_strdup(to_add);
+			return (true);
 		}
-		env[i] = NULL;
-		//free stuff
+        free(temp2);
+		i++;
 	}
-	else
+	return (free(temp1), false);
+}
+
+bool	parse_export(char *str, int n)//error messages
+{
+	int	i;
+
+	if (!str || !ft_isalpha(str[0]))
+		return (false);
+	i = 0;
+	while (i < n)
 	{
-		vars = ft_split(job->job[1], ' ');//error check
-		i = 0;
-		while (env[i])
-			i++;
-		j = 0;
-		while (vars[j])
-		{
-			temp = ft_getenv(vars[j], temp_vars);//error check
-			vars[j] = ft_strjoin(vars[j], "=");
-			temp = ft_strjoin(vars[j], temp);
-			env[i] = ft_strdup(temp);//error check
-			j++;
-			i++;
-		}
-		env[i] = NULL;
-		//free stuff
+		if (!ft_isalnum(str[i]))
+			return (false);
+		i++;
 	}
-	 */
+	return (true);
+}
+
+void	export_new(char *var, char **env)
+{
+	char	**new_env;
+	int		i;
+
+	if (is_in_env(var, env))
+		return ;
+	i = 0;
+	new_env = ft_calloc(sizeof(char *), ft_split_wordcount(env) + 1);
+	if (!new_env)
+		return ;
+	new_env = env;
+	while (env[i])
+		i++;
+	new_env[i] = ft_strdup(var);//error check
+	new_env[i + 1] = NULL;
+}
+
+int	export_no_execd(char **env)
+{
+	int		i;
+	char	*temp1;
+	char	*temp2;
+
+	i = 0;
+	while (env[i])
+	{
+		temp1 = ft_substr(env[i], 0, len_to_equal(env[i]) + 1);//error check
+		temp2 = ft_substr(env[i], len_to_equal(env[i]) + 1, ft_strlen(env[i]));//error check
+		ft_printf("declare -x %s\"%s\"\n", temp1, temp2);
+		free (temp1);
+		free (temp2);
+		i++;
+	}
 	return (0);
 }
+
+int	caught_export(t_jobs *job, t_env env)//fix export var =value (the space)
+{
+	int	status;
+
+	if (!job->job[1])
+		return (export_no_execd(env.env));//fix
+	job->job++;
+	status = 0;
+	while (*job->job)
+	{
+		if (!parse_export(*job->job, len_to_equal(*job->job)))
+		{
+			ft_printf_fd(2, "minishell: export: '%s': not a valid identifier\n", *job->job);
+			status = 1;//check exit code
+		}
+		else if (ft_strchr(*job->job, '='))//parse in case it just sends a variable name
+		{
+			export_new(*job->job, env.env);//error check
+		}
+		job->job++;
+	}
+	return (status);
+}
+

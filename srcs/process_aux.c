@@ -3,104 +3,95 @@
 /*                                                        :::      ::::::::   */
 /*   process_aux.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bruno <bruno@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 19:13:31 by bruno             #+#    #+#             */
-/*   Updated: 2024/08/16 01:10:49 by bruno            ###   ########.fr       */
+/*   Updated: 2024/09/11 12:14:43 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-
-void	ft_perror_exit(char *str)//remove
-{
-	write(2, "minishell: ", 11);
-	perror (str);
-}
-// ! RENAME
-int find_command_path(char **cmd, char **env)
+char	*find_command_path(char	**cmd, t_env env)
 {
 	char	**path_array;
 	char	*path;
-	char	*partial;//remove?
 	int		i;
 
-	path = ft_getenv("PATH", env);//error check
-	path_array = ft_split(path, ':');//error check
-	if (!path_array)
-		exit (0);//exit code
+	path = ft_getenv("PATH", env.env);
+	path_array = ft_split(path, ':');
 	free (path);
+	if (!path_array)
+		return (NULL);
 	i = 0;
 	while (path_array[i])
 	{
-		partial = ft_strjoin(path_array[i], "/");//error check
-		path = ft_strjoin(partial, cmd[0]);
-		free (partial);
+		path = ft_strjoin3(path_array[i], "/", cmd[0]);
+		if (!path)
+			return (free_array(path_array), NULL);
 		if (access(path, F_OK) == 0)
-		{
-			free_array(path_array);
-			execve(path, cmd, env);
-		}
+			return (free_array(path_array), path);
 		free (path);
 		i++;
 	}
-	printf("%s: command not found\n", cmd[0]);
 	free_array(path_array);
-	exit (127);
+	return (ft_printf_fd(2, "minishell: %s: command not found\n", cmd[0]), NULL);
 }
 
-char	*fix_cmd(char *cmd)
+int execute_command(t_jobs *job, t_env env)
 {
-	char	*newcmd;
+	char	*path;
 
-	if (cmd[0] == '~')
-		newcmd = ft_strjoin(".", cmd + 1);//replaces the ~ for a . //error check
-	else
-		newcmd = cmd;
-	return (newcmd);
+	path = find_command_path(job->job, env);
+	if (!path)
+		clean_exit(job, env, 127);
+	execve(path, job->job, env.env);
+	clean_exit(job, env, 127);
 }
-// ! RENAME
-int find_executable_path(char **cmd, char **env)//find better way to update command
+
+char	*find_executable_path(char *cmd)
 {
-	char	*path = NULL;
+	char	*path;
 	char	cwd[PATH_MAX];
-	char	*dir;
-	
-	//use absolute path from beginning
 
-	if (*cmd[0] == '~')
-	{
-		dir = ft_getenv("HOME", env);//error check
-		path = ft_strjoin(dir, "/");//error check
-		path = ft_strjoin(path, *cmd + 2);//error check
-	}
+	if (cmd[0] == '/')
+		path = cmd;
 	else
 	{
-		dir = getcwd(cwd, PATH_MAX);//error check
-		path = ft_strjoin(dir, "/");//error check
-		path = ft_strjoin(path, *cmd);//error check
+		getcwd(cwd, PATH_MAX);//error check
+		path = ft_strjoin3(cwd, "/", cmd);//error check
+		if (!path)
+			return (NULL);
 	}
-	*cmd = fix_cmd(*cmd);//error check
 	if (access(path, F_OK) == 0)
-		execve(path, cmd, env);//error check
-	ft_perror_exit(cmd[0]);
-	exit (127);
+		return (path);
+	free (path);
+	ft_printf_fd(2, "minishell: %s: No such file or directory\n", cmd);
+	return (NULL);
 }
 
-int	execute_job(char **command, char **env)
+int execute_executable(t_jobs *job, t_env env)
 {
-//	char	*path;
-	int status = 0;
+	char	*path;
+	//check if executable exists?
 
-	if (!command[0])
-		return (ft_printf("job error\n"), 126);//fix the error return, test with "" as input
-	if (ft_strchr(command[0], '/'))
-		status = find_executable_path(&command[0], env);
+	path = find_executable_path(job->job[0]);
+	if (!path)
+		clean_exit(job, env, 127);
+	execve(path, job->job, env.env);
+	ft_printf_fd(2, "execve() failed\n");
+	free (path);
+	clean_exit(job, env, 127);
+}
+
+int	execute_job(t_jobs *job, t_env env)
+{
+	int 	status = 0;
+	if (!job->job[0])
+		return (ft_printf("job error\n"), 126);
+	if (ft_strchr(job->job[0], '/'))
+		status = execute_executable(job, env);
 	else
-		status = find_command_path(&command[0], env);
-	//! DECLARING VARIABLES HERE? 
-//	free_array(command);
-	exit (0);//free fds
+		status = execute_command(job, env);
 }
 
