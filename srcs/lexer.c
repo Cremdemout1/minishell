@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*																			*/
 /*														:::	  ::::::::   */
-/*   job_list.c										 :+:	  :+:	:+:   */
+/*   lexer.c										   :+:	  :+:	:+:   */
 /*													+:+ +:+		 +:+	 */
 /*   By: ycantin <ycantin@student.42.fr>			+#+  +:+	   +#+		*/
 /*												+#+#+#+#+#+   +#+		   */
@@ -155,6 +155,8 @@ void	make_job_list(t_jobs **job_list, t_token **tok_list, t_env env)
 			cur = cur->next;
 			continue ;
 		}
+		if (new->heredoc_file)
+    		free(new->heredoc_file);
 		new->heredoc_file = filename(i);
 		new->job = job_array(&cur, &new, env);
 		new->type = WORD;

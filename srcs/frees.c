@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/28 15:18:01 by ycantin           #+#    #+#             */
-/*   Updated: 2024/09/06 10:16:22 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/09/12 19:55:50 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ void	clear_jobs(t_jobs **lst)
 		if(current->job)
 			free_array(current->job);
 		free(current->input);
+		free(current->heredoc_file);
 		free(current->delimiters);
 		free(current->output);
 		free(current);

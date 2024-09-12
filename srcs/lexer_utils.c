@@ -6,7 +6,7 @@
 /*   By: ycantin <ycantin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/26 18:20:43 by ycantin           #+#    #+#             */
-/*   Updated: 2024/09/06 10:15:38 by ycantin          ###   ########.fr       */
+/*   Updated: 2024/09/12 19:46:00 by ycantin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ t_jobs	*addjob(void *content)
 	list->type = 0;
 	list->append = 0;
 	list->heredoc = 0;
+	list->heredoc_file = NULL;
 	list->delimiters = NULL;
 	list->mult_input_flag = 0;
 	list->input = NULL;
